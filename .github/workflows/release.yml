@@ -1,0 +1,45 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        server-id: ossrh
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+    - name: Configure Git
+      run: |
+        git config --global committer.email "noreply@github.com"
+        git config --global committer.name "GitHub Release Workflow"
+        git config --global author.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global author.name "${GITHUB_ACTOR}"
+    - id: install-secret-key
+      name: Install gpg secret key
+      run: cat <(echo -e "${{ secrets.SIGNING_KEY }}") | gpg --batch --import
+    - name: Test
+      run: mvn -B clean verify
+    - name: Document Release Version
+      run: |
+        export RELEASE_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed "s/-SNAPSHOT$//" )
+        sed "s|<version>[0-9\.]*</version>|<version>${RELEASE_VERSION}</version>|g" -i README.md
+        git add README.md
+        git commit -m "[skip ci] Documenting upcoming release version"
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+        SIGNING_KEY_NAME: ${{ secrets.SIGNING_KEY_NAME }}
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      run: mvn -B -P sign release:prepare release:perform
+
+
