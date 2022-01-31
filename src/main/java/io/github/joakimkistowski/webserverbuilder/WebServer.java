@@ -52,7 +52,7 @@ import java.util.List;
  * </p>
  *     <ul>
  *         <li>Servlets: must specify their URL path using value-property of the {@link WebServlet}-annotation,
- *           other properties of the annotation are ignored.<br/>
+ *           other properties of the annotation are ignored.<br>
  *           Optionally, servlets may be annotated with the {@link MultipartConfig}-annotation, which is supported fully.</li>
  *         <li>Filters: must specify their URL path using the value-property of the {@link WebFilter}-annotation,
  *           other properties of the annotation are ignored.</li>
@@ -305,7 +305,7 @@ public class WebServer implements AutoCloseable {
          * <p>Add a servlet to the web server.</p>
          * <p>
          *     Servlets must specify their URL path using value-property of the {@link WebServlet}-annotation,
-         *     other properties of the annotation are ignored.<br/>
+         *     other properties of the annotation are ignored.<br>
          *     Optionally, servlets may be annotated with the {@link MultipartConfig}-annotation, which is supported fully.
          * </p>
          * @param servlet The servlet to add.
@@ -320,7 +320,7 @@ public class WebServer implements AutoCloseable {
          * <p>Add servlets to the web server.</p>
          * <p>
          *     Servlets must specify their URL path using value-property of the {@link WebServlet}-annotation,
-         *     other properties of the annotation are ignored.<br/>
+         *     other properties of the annotation are ignored.<br>
          *     Optionally, servlets may be annotated with the {@link MultipartConfig}-annotation, which is supported fully.
          * </p>
          * @param servlets The servlets to add.
