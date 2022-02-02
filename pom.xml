@@ -41,6 +41,7 @@
 
         <resteasy.version>6.0.0.Final</resteasy.version>
         <jetty.version>11.0.6</jetty.version>
+        <websocket-api.version>2.0.0</websocket-api.version>
 
         <lombok.version>1.18.22</lombok.version>
     </properties>
@@ -55,6 +56,22 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
             <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.toolchain</groupId>
+            <artifactId>jetty-jakarta-websocket-api</artifactId>
+            <version>${websocket-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-core</artifactId>
+            <version>${resteasy.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
