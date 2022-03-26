@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <resteasy.version>6.0.0.Final</resteasy.version>
-        <jetty.version>11.0.6</jetty.version>
+        <jetty.version>11.0.8</jetty.version>
         <websocket-api.version>2.0.0</websocket-api.version>
 
         <lombok.version>1.18.22</lombok.version>
