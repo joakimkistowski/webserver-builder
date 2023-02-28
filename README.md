@@ -63,7 +63,7 @@ You can modify the following configurations regarding static file serving:
 * Static files are cached in the web server in a 32 MiB cache.  
   You can modify the cache size by passing the new size (in bytes) to `maxLocalCacheSize()`
 * Static files use ETags and set the Cache-Control header telling the browser to cache static content for 7 days.  
-  You can modify the `maxAge` Cache-Control property using `clientBrowserCacheMaxAge()`
+  You can modify the `maxAge` Cache-Control property using `clientBrowserCacheMaxAge()`. A negative max age will cause the header to be omitted.
 
 ### Serving REST APIs
 

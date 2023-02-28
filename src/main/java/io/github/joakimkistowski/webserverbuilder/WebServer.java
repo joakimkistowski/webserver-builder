@@ -13,9 +13,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Response;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Connector;
@@ -266,9 +264,13 @@ public class WebServer implements AutoCloseable {
         holder.setInitParameter("dirAllowed", String.valueOf(false));
         holder.setInitParameter("welcomeServlets", String.valueOf(false));
         holder.setInitParameter("etags", String.valueOf(true));
-        log.info("Sending max age header for static files. Max age is {} days",
-                ((double) clientBrowserCacheMaxAge) / (24.0 * 60.0 * 60.0));
-        holder.setInitParameter("cacheControl", "max-age=" + clientBrowserCacheMaxAge);
+        if (clientBrowserCacheMaxAge >= 0) {
+            log.info("Sending max age header for static files. Max age is {} days",
+                    ((double) clientBrowserCacheMaxAge) / (24.0 * 60.0 * 60.0));
+            holder.setInitParameter("cacheControl", "max-age=" + clientBrowserCacheMaxAge);
+        } else {
+            log.info("Not sending max age header for static files");
+        }
         log.info("Using in-memory cache with size of {} KiB for static files", ((double) maxLocalCacheSize) / 1024.0);
         holder.setInitParameter("maxCacheSize", String.valueOf(maxLocalCacheSize));
         holder.setInitParameter("maxCachedFileSize", String.valueOf(maxLocalCacheSize / 2));
