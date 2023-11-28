@@ -116,7 +116,7 @@ try (
 The web server supports Jakarta web sockets.
 
 Add the following library to your `pom`:
-* `org.eclipse.jetty.websocket`:`websocket-jakarta-server`
+* `org.eclipse.jetty.ee10.websocket`:`jetty-ee10-websocket-jakarta-server`
 
 To use web sockets, define an endpoint factory, which will be called to instantiate a web socket endpoint each time a websocket connection is established.
 

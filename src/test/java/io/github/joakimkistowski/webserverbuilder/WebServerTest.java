@@ -19,11 +19,13 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -115,7 +117,7 @@ public class WebServerTest {
     }
 
     @Test
-    void givenNoErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
+    void givenDefaultErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
         // when
         try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).build()) {
             WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
@@ -126,14 +128,14 @@ public class WebServerTest {
                     TEST_CLIENT, WebServerTestUtils.GET("localhost", TEST_PORT, "/test0"));
             assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
             // Contains default Jetty Error message
-            assertThat(response.body()).contains("org.eclipse.jetty");
+            assertThat(response.body()).contains("<h2>HTTP ERROR 404 Not Found</h2>");
         }
     }
 
     @Test
-    void givenErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
+    void givenCustomErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
         // when
-        try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).errorHandler(new ErrorHandler()).build()) {
+        try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).errorHandler(new TestErrorHandler()).build()) {
             WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
 
             // then
@@ -141,7 +143,8 @@ public class WebServerTest {
             HttpResponse<String> response = WebServerTestUtils.blockingSend(
                     TEST_CLIENT, WebServerTestUtils.GET("localhost", TEST_PORT, TEST_FILE_URI));
             assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
-            assertThat(response.body()).doesNotContain("<h2>404</h2>");
+            assertThat(response.body()).doesNotContain("<h2>HTTP ERROR 404 Not Found</h2>");
+            assertThat(response.body()).contains("<h3>Custom Error: 404</h3>");
         }
     }
 
@@ -348,6 +351,15 @@ public class WebServerTest {
     }
 
     public static class NoAnnotationWebsocketEndpoint {
+    }
+
+    public static class TestErrorHandler extends ErrorHandler {
+        @Override
+        protected void writeErrorHtmlMessage(Request request, Writer writer, int code, String message, Throwable cause, String uri) throws IOException {
+            writer.write("<h3>Custom Error: ");
+            writer.write(String.valueOf(code));
+            writer.write("</h3>\n");
+        }
     }
 
 }
