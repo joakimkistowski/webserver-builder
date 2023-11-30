@@ -3,7 +3,6 @@
 Web server with builder API for quick and easy construction of an embedded Jetty web server.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.joakimkistowski/webserver-builder.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.joakimkistowski%22%20AND%20a:%22webserver-builder%22)
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/joakimkistowski/webserver-builder/Release/main)
 ![GitHub](https://img.shields.io/github/license/joakimkistowski/webserver-builder)
 
 `webserver-builder` supports Servlets, Jakarta-REST (former JAX-RS), WebSockets, and static file serving. The API is designed to always take instantiated objects instead of classes. This allows users to apply common design patterns, such as dependency injection using constructors.
