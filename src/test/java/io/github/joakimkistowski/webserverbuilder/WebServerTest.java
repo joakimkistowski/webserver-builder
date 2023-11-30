@@ -1,11 +1,8 @@
 package io.github.joakimkistowski.webserverbuilder;
 
 import io.github.joakimkistowski.webserverbuilder.testrestapplication.TestRestApplication;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import io.github.joakimkistowski.webserverbuilder.testservlets.MultipartServlet;
+import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpFilter;
@@ -17,18 +14,23 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import java.net.http.WebSocket;
-import java.net.http.WebSocketHandshakeException;
+import java.net.http.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionException;
@@ -46,6 +48,8 @@ public class WebServerTest {
     private static final String HEADER_TEST_HEADER = "X-Test-Header";
 
     private static final HttpClient TEST_CLIENT = HttpClient.newHttpClient();
+
+    private static final OkHttpClient OK_HTTP_CLIENT = new OkHttpClient.Builder().build();
 
     @Test
     void givenServletsAndStaticFiles_whenBuildingAndStartingWebServer_thenServletsAndFilesAreServed() throws IOException {
@@ -115,7 +119,7 @@ public class WebServerTest {
     }
 
     @Test
-    void givenNoErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
+    void givenDefaultErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
         // when
         try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).build()) {
             WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
@@ -126,14 +130,14 @@ public class WebServerTest {
                     TEST_CLIENT, WebServerTestUtils.GET("localhost", TEST_PORT, "/test0"));
             assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
             // Contains default Jetty Error message
-            assertThat(response.body()).contains("org.eclipse.jetty");
+            assertThat(response.body()).contains("<h2>HTTP ERROR 404 Not Found</h2>");
         }
     }
 
     @Test
-    void givenErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
+    void givenCustomErrorHandlerAndNoStaticFiles_whenBuildingAndStartingWebServer_thenErrorsAreHandled() throws IOException {
         // when
-        try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).errorHandler(new ErrorHandler()).build()) {
+        try (var webServer = WebServer.builder().port(TEST_PORT).staticFileServletDisabled(true).errorHandler(new TestErrorHandler()).build()) {
             WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
 
             // then
@@ -141,7 +145,8 @@ public class WebServerTest {
             HttpResponse<String> response = WebServerTestUtils.blockingSend(
                     TEST_CLIENT, WebServerTestUtils.GET("localhost", TEST_PORT, TEST_FILE_URI));
             assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
-            assertThat(response.body()).doesNotContain("<h2>404</h2>");
+            assertThat(response.body()).doesNotContain("<h2>HTTP ERROR 404 Not Found</h2>");
+            assertThat(response.body()).contains("<h3>Custom Error: 404</h3>");
         }
     }
 
@@ -279,6 +284,29 @@ public class WebServerTest {
         }
     }
 
+    @Test
+    void givenBytes_whenUploadingMultipart_thenIsUploaded() throws IOException {
+        // given
+        var requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("file", "test.txt",
+                        RequestBody.create("exampleText".getBytes(StandardCharsets.UTF_8), MediaType.parse("text/plain")))
+                .build();
+        try (WebServer webServer = WebServer.builder().port(TEST_PORT).servlet(new MultipartServlet()).build()) {
+            WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
+            // when
+            try (var response = OK_HTTP_CLIENT.newCall(new okhttp3.Request.Builder()
+                    .url("http://localhost:" + TEST_PORT + "/multipart")
+                    .post(requestBody)
+                    .build()).execute()) {
+                // then
+                assertThat(response.code()).isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+            }
+//            var response = WebServerTestUtils.blockingSend(TEST_CLIENT,  HttpRequest.newBuilder(URI.create("http://localhost:" + TEST_PORT + "/multipart"))
+//                    .POST(HttpRequest.BodyPublishers.ofString("test")).header("Content-Type", "multipart/form-data;boundary=8342834723483246asdf").build());
+//            assertThat(response.statusCode()).isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+        }
+    }
+
     @WebServlet("/test0")
     private static class TestServlet0 extends HttpServlet {
         @Override
@@ -348,6 +376,15 @@ public class WebServerTest {
     }
 
     public static class NoAnnotationWebsocketEndpoint {
+    }
+
+    public static class TestErrorHandler extends ErrorHandler {
+        @Override
+        protected void writeErrorHtmlMessage(Request request, Writer writer, int code, String message, Throwable cause, String uri) throws IOException {
+            writer.write("<h3>Custom Error: ");
+            writer.write(String.valueOf(code));
+            writer.write("</h3>\n");
+        }
     }
 
 }

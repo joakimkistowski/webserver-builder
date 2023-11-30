@@ -16,15 +16,15 @@ import jakarta.ws.rs.core.Application;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.jboss.resteasy.core.SynchronousDispatcher;
 import org.jboss.resteasy.core.providerfactory.ResteasyProviderFactoryImpl;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
@@ -183,7 +183,7 @@ public class WebServer implements AutoCloseable {
                 .forEach(factories -> factories.stream().filter(f -> f instanceof HttpConnectionFactory)
                         .forEach(f -> ((HttpConnectionFactory) f).getHttpConfiguration().setSendServerVersion(false)));
         this.jetty.getContextHandler().setContextPath(servletCompatibleContextRoot(contextRoot));
-        this.jetty.getContextHandler().setBaseResource(Resource.newClassPathResource(staticContentDir));
+        this.jetty.getContextHandler().setBaseResource(ResourceFactory.root().newClassLoaderResource(staticContentDir));
 
         if (servlets != null) {
             servlets.forEach(this::addServlet);

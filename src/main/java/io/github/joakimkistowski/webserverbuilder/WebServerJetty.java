@@ -1,7 +1,7 @@
 package io.github.joakimkistowski.webserverbuilder;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 
 /**
  * Container for the underlying Jetty server and its servlet context handler.
