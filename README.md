@@ -141,3 +141,8 @@ Regarding web sockets, the web server builder supports:
 * Specification of the web socket subprotocols for subprotocol negotiation.  
   Specify the available subprotocols using the builder's `webSocketSubProtocols()`-method.
 * Customizing the web socket handshake by passing a custom `WebSocketHandshakeModifier` to the builder's `webSocketHandshakeModifier()`-method.
+
+### Allowing Multipart File Upload
+
+The web server supports multipart file upload via the Jakarta EE `@MultipartConfig` annotation.  
+Note, that you must specify a location for the uploaded file to be stored using the annotation's `location`-Property (since Jetty 12). Set a high `fileSizeThreshold` if you want Jetty to keep uploaded files to memory instead of writing them to disk. 
