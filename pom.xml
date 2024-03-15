@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <resteasy.version>6.2.7.Final</resteasy.version>
-        <jetty.version>12.0.6</jetty.version>
+        <jetty.version>12.0.7</jetty.version>
         <websocket-api.version>2.0.0</websocket-api.version>
 
         <lombok.version>1.18.30</lombok.version>
@@ -229,7 +229,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.2.0</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
