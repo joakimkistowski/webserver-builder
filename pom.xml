@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <resteasy.version>6.2.8.Final</resteasy.version>
-        <jetty.version>12.0.7</jetty.version>
+        <jetty.version>12.0.8</jetty.version>
         <websocket-api.version>2.0.0</websocket-api.version>
 
         <lombok.version>1.18.32</lombok.version>
@@ -186,7 +186,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>0.8.12</version>
                 <executions>
                     <execution>
                         <goals>
