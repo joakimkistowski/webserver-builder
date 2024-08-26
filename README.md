@@ -15,7 +15,7 @@ Get the library from maven central.
 <dependency>
     <groupId>io.github.joakimkistowski</groupId>
     <artifactId>webserver-builder</artifactId>
-    <version>0.3.20</version>
+    <version>0.3.21</version>
 </dependency>
 ```
 
