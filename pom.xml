@@ -39,7 +39,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <resteasy.version>6.2.9.Final</resteasy.version>
+        <resteasy.version>6.2.10.Final</resteasy.version>
         <jetty.version>12.0.12</jetty.version>
         <websocket-api.version>2.0.0</websocket-api.version>
 
