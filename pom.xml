@@ -5,7 +5,7 @@
     <groupId>io.github.joakimkistowski</groupId>
     <artifactId>webserver-builder</artifactId>
     <packaging>jar</packaging>
-    <version>0.3.33-SNAPSHOT</version>
+    <version>0.3.33</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Web server with builder API for quick and easy construction of an embedded Jetty web server.</description>
@@ -31,7 +31,7 @@
         <connection>scm:git:https://github.com/joakimkistowski/webserver-builder.git</connection>
         <developerConnection>scm:git:https://github.com/joakimkistowski/webserver-builder.git</developerConnection>
         <url>https://github.com/joakimkistowski/webserver-builder/tree/main</url>
-        <tag>HEAD</tag>
+        <tag>webserver-builder-0.3.33</tag>
     </scm>
 
     <properties>
