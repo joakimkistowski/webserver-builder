@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <resteasy.version>6.2.12.Final</resteasy.version>
-        <jetty.version>12.0.23</jetty.version>
+        <jetty.version>12.0.24</jetty.version>
         <websocket-api.version>2.0.0</websocket-api.version>
 
         <lombok.version>1.18.38</lombok.version>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.27.3</version>
+            <version>3.27.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
