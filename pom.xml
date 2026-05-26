@@ -208,7 +208,6 @@
                 <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <!-- Must match server-id in actions/setup-java (generates ~/.m2/settings.xml) -->
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>true</autoPublish>
                     <waitUntil>published</waitUntil>
@@ -217,9 +216,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.3.1</version>
                 <configuration>
-                    <!-- Ensures the 'sign' profile is active in the inner release:perform build -->
                     <releaseProfiles>sign</releaseProfiles>
                 </configuration>
             </plugin>
