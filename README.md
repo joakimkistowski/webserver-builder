@@ -33,7 +33,7 @@ WebServer webServer = WebServer.builder()
     .errorHandler(new MyErrorHandler())
     // Specify the port, it is 8080 by default
     .port(8081)
-    .build()
+    .build();
 // Start the web server
 // Alternatively, use "startInBackground" to start it asynchronously in the background
 webServer.start();
