@@ -2,7 +2,11 @@ package io.github.joakimkistowski.webserverbuilder;
 
 import io.github.joakimkistowski.webserverbuilder.testrestapplication.TestRestApplication;
 import io.github.joakimkistowski.webserverbuilder.testservlets.MultipartServlet;
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpFilter;
@@ -16,25 +20,32 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
+import org.eclipse.jetty.client.ContentResponse;
+import org.eclipse.jetty.client.MultiPartRequestContent;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.MultiPart;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.BlockingArrayQueue;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
-import java.net.http.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
+import java.net.http.WebSocket;
+import java.net.http.WebSocketHandshakeException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +60,17 @@ public class WebServerTest {
 
     private static final HttpClient TEST_CLIENT = HttpClient.newHttpClient();
 
-    private static final OkHttpClient OK_HTTP_CLIENT = new OkHttpClient.Builder().build();
+    private static final org.eclipse.jetty.client.HttpClient JETTY_HTTP_CLIENT = new org.eclipse.jetty.client.HttpClient();
+
+    @BeforeAll
+    static void setUp() throws Exception {
+        JETTY_HTTP_CLIENT.start();
+    }
+
+    @AfterAll
+    static void tearDown() throws Exception {
+        JETTY_HTTP_CLIENT.stop();
+    }
 
     @Test
     void givenServletsAndStaticFiles_whenBuildingAndStartingWebServer_thenServletsAndFilesAreServed() throws IOException {
@@ -285,25 +306,23 @@ public class WebServerTest {
     }
 
     @Test
-    void givenBytes_whenUploadingMultipart_thenIsUploaded() throws IOException {
+    void givenBytes_whenUploadingMultipart_thenIsUploaded() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         // given
-        var requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("file", "test.txt",
-                        RequestBody.create("exampleText".getBytes(StandardCharsets.UTF_8), MediaType.parse("text/plain")))
-                .build();
+        var requestBody = new MultiPartRequestContent();
+        requestBody.addPart(new MultiPart.ByteBufferPart(
+                "file", "test.txt", null,
+                ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8)))
+        );
+        requestBody.close();
         try (WebServer webServer = WebServer.builder().port(TEST_PORT).servlet(new MultipartServlet()).build()) {
             WebServerTestUtils.startWebServerAndWaitUntilStarted(webServer);
             // when
-            try (var response = OK_HTTP_CLIENT.newCall(new okhttp3.Request.Builder()
-                    .url("http://localhost:" + TEST_PORT + "/multipart")
-                    .post(requestBody)
-                    .build()).execute()) {
-                // then
-                assertThat(response.code()).isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
-            }
-//            var response = WebServerTestUtils.blockingSend(TEST_CLIENT,  HttpRequest.newBuilder(URI.create("http://localhost:" + TEST_PORT + "/multipart"))
-//                    .POST(HttpRequest.BodyPublishers.ofString("test")).header("Content-Type", "multipart/form-data;boundary=8342834723483246asdf").build());
-//            assertThat(response.statusCode()).isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+            ContentResponse response = JETTY_HTTP_CLIENT.POST("http://localhost:" + TEST_PORT + "/multipart")
+                    .body(requestBody)
+                    .send();
+            // then
+            assertThat(response.getStatus()).isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+
         }
     }
 
